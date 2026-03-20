@@ -21,17 +21,15 @@ jobs:
       - name: Setup .NET 8
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0'
+          dotnet-version: '8.0.x'
 
       - name: Restaurar dependencias
         run: |
-          cd "Seguridad/Seguridad.MiddlewareAutorizacion"
-          dotnet restore
+          dotnet restore "Seguridad/Seguridad.MiddlewareAutorizacion/Autorizacion.Middleware/Autorizacion.Middleware.csproj"
 
       - name: Compilar en Release
         run: |
-          cd "Seguridad/Seguridad.MiddlewareAutorizacion"
-          dotnet build --configuration Release --no-restore
+          dotnet build "Seguridad/Seguridad.MiddlewareAutorizacion/Autorizacion.Middleware/Autorizacion.Middleware.csproj" --configuration Release --no-restore
 
       - name: Cleanup old .nupkg files
         run: |
@@ -39,16 +37,19 @@ jobs:
 
       - name: Empaquetar (dotnet pack)
         run: |
-          cd "Seguridad/Seguridad.MiddlewareAutorizacion"
-          dotnet pack --configuration Release --no-build --output ./nupkgs
+          dotnet pack "Seguridad/Seguridad.MiddlewareAutorizacion/Autorizacion.Middleware/Autorizacion.Middleware.csproj" --configuration Release --no-build --output "Seguridad/Seguridad.MiddlewareAutorizacion/nupkgs"
 
-      - name: Set up NuGet sources
-        run: dotnet nuget add source "https://nuget.pkg.github.com/SC-701/index.json" --name "github" --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text
+      - name: Set up NuGet source
+        run: |
+          dotnet nuget add source "https://nuget.pkg.github.com/SC-701/index.json" \
+            --name "github" \
+            --username "${{ github.actor }}" \
+            --password "${{ secrets.GITHUB_TOKEN }}" \
+            --store-password-in-clear-text
 
       - name: Publicar en GitHub Packages
         run: |
-          cd "Seguridad/Seguridad.MiddlewareAutorizacion"
-          dotnet nuget push ./nupkgs/*.nupkg \
-            --source "https://nuget.pkg.github.com/SC-701/index.json" \
-            --api-key ${{ secrets.GITHUB_TOKEN }} \
+          dotnet nuget push "Seguridad/Seguridad.MiddlewareAutorizacion/nupkgs/*.nupkg" \
+            --source "github" \
+            --api-key "${{ secrets.GITHUB_TOKEN }}" \
             --skip-duplicate
