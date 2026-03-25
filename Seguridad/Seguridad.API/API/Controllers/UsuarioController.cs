@@ -24,12 +24,12 @@ namespace API.Controllers
         {
             return Ok( await _usuarioFlujo.ObtenerUsuario(usuario));
         }
-
         [AllowAnonymous]
         [HttpPost("RegistrarUsuario")]
         public async Task<IActionResult> PostAsync([FromBody] UsuarioBase usuario)
         {
-            return Ok("ENTRO AL CONTROLLER");
+            var resultado = await _usuarioFlujo.CrearUsuario(usuario);
+            return CreatedAtAction(nameof(ObtenerUsuario), null, resultado);
         }
 
 
